@@ -17,7 +17,7 @@ style=" background: url({% static 'extra-images/cover-photo01.jpg' %}) no-repeat
                                 <!--
                                     <img src="{% static 'extra-images/listing-logo18.png' %}" alt="">
                                 -->
-                                <img src="{{vendor.user_profile.profile_photo.url}}" alt="">
+                                <img src="{{vendor.user_profile.profile_picture.url}}" alt="">
                             </figure>
                         </div>
 
@@ -25,7 +25,7 @@ style=" background: url({% static 'extra-images/cover-photo01.jpg' %}) no-repeat
                             <span class="restaurant-title">{{vendor.vendor_name}}</span>
                             <div class="text">
                                 <i class="icon-location"></i>
-                                <p>{{vendor.user_profile.full_address}}</p>
+                                <p>{{vendor.user_profile.address}}</p>
                             </div>
                         </div>
                     </div>
