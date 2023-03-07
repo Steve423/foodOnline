@@ -20,7 +20,7 @@ function onPlaceChanged (){
         document.getElementById('id_address').placeholder = "Start typing...";
     }
     else{
-        console.log('place name=>', place.name)
+        //console.log('place name=>', place.name)
     }
     // get the address components and assign them to the fields
     // console.log(place);
@@ -45,7 +45,7 @@ function onPlaceChanged (){
         }
 
     });
-    console.log('place.address_components=>', place.address_components);
+   //console.log('place.address_components=>', place.address_components);
     // loop through the address components and assign other address data
     for(var i=0; i<place.address_components.length; i++){
         for(var j=0; j<place.address_components[i].types.length; j++){
