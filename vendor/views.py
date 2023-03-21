@@ -65,7 +65,7 @@ def menu_builder(request):
 def fooditems_by_category(request, pk=None):
     vendor = get_vendor(request)
     category = get_object_or_404(Category, pk=pk)
-    fooditems = FoodItem.objects.filter(vendor=vendor, category=category)
+    fooditems = FoodItem.objects.filter(vendor=vendor, category=category).order_by('food_title')
     context = {
         'fooditems': fooditems,
         'category': category,
