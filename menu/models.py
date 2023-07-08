@@ -5,7 +5,7 @@ from vendor.models import Vendor
 
 class Category(models.Model):
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
-    category_name = models.CharField(max_length=50, unique=True)
+    category_name = models.CharField(max_length=50)
     slug = models.SlugField(max_length=100, unique=True)
     description = models.TextField(max_length=250, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -40,3 +40,8 @@ class FoodItem(models.Model):
     def __str__(self):
         return self.food_title
 
+
+class City_lat_lon(models.Model):
+    city = models.CharField(blank=False, max_length=20, null=False)
+    latitude = models.CharField(blank=False, max_length=20, null=False)
+    longitude = models.CharField(blank=False, max_length=20, null=False)

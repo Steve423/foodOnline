@@ -23,12 +23,16 @@ from marketplace import views as MarketplaceViews
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
+#    path('', views.autocomplete, name='autocomplete'),
+
     path('', include('accounts.urls')),
 
     path('marketplace/', include('marketplace.urls')),
 
     # CART
     path('cart/', MarketplaceViews.cart, name='cart'),
+    # SEARCH
+    path('search/', MarketplaceViews.search, name='search'),
 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
