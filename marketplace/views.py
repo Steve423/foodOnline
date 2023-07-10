@@ -1,5 +1,6 @@
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template import RequestContext
 from .context_processors import get_cart_counter, get_cart_amounts
 # from marketplace.models import Cart
 from menu.models import Category, FoodItem, City_lat_lon
@@ -13,6 +14,7 @@ from django.db.models import Q
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.measure import D  # ``D`` is a shortcut for ``Distance``
 from django.contrib.gis.db.models.functions import Distance
+import winrt.windows.devices.geolocation as wdg, asyncio
 
 def marketplace(request):
     vendors = Vendor.objects.filter(is_approved=True, user__is_active=True)
@@ -123,10 +125,39 @@ def delete_cart(request, cart_id):
         else:
             return JsonResponse({'status': 'Failed', 'message': 'Invalid request'})            
 
+async def getCoords():
+        locator = wdg.Geolocator()
+        pos = await locator.get_geoposition_async()
+        
+        return [pos.coordinate.latitude, pos.coordinate.longitude]
+    
+def getLoc():
+    return asyncio.run(getCoords())
+
 def search(request):
     if not 'address' in request.GET:
         return redirect('marketplace')
     else:
+        # myGet = getLoc()
+        # intLoop =0
+        # for xmyGet in myGet:
+        #     if intLoop == 0:
+        #         myLat = xmyGet
+        #     if intLoop == 1:
+        #         myLng = xmyGet
+
+        #     intLoop = intLoop +1
+        # vendor_newGPS = "__Lat_=_" + str(myLat) + "_Lng_=_" + str(myLng)
+
+
+        # freegeoip = "https://freegeoip.net/json"
+        # geo_r = RequestContext.get(freegeoip)
+        # geo_json = geo_r.json()
+
+        # user_postition = [geo_json["latitude"], geo_json["longitude"]]
+
+        # print("======= " + user_postition)
+ 
         address = request.GET['address']
         latitude = request.GET['lat']
         longitude = request.GET['lng']
