@@ -102,6 +102,7 @@ $(document).ready(function(){
                         response.cart_amount['tax_dict'],
                         response.cart_amount['grand_total']
                     )
+
                 }
             }
         })
@@ -213,12 +214,18 @@ $(document).ready(function(){
             $('#subtotal').html(subtotal)
             $('#total').html(grand_total)
 
-            console.log(tax_dict)
+            //console.log(tax_dict)
             for(key1 in tax_dict){
-                console.log(tax_dict[key1])
+                //console.log(tax_dict[key1])
                 for(key2 in tax_dict[key1]){
+                    // console.log("ccc")
+                    // console.log('"tax-'+key1+'"')
+                    // var ddd = '"tax-'+key1+'"'
+                    // var dd2 = ddd.replace(/"/gi, '')
+                    // console.log('#'+dd2)
                     // console.log(tax_dict[key1][key2])
                     $('#tax-'+key1).html(tax_dict[key1][key2])
+                    //$('#'+dd2).html(tax_dict[key1][key2])
                 }
             }
         }
