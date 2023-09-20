@@ -17,6 +17,11 @@ from django.template.defaultfilters import slugify
 
 
 def get_vendor(request):
+    # print("__ee_request_user_=_" + str(request.user ))
+    # print("__ff_request_user_id_=_" + str(request.user.id ))
+    print("__ee_before_all_attr_=_")
+    print(dir(request))
+    print("__ff_request.user_=_" + str(request.user))
     vendor = Vendor.objects.get(user=request.user)
     return vendor
 
@@ -167,18 +172,25 @@ def add_food(request):
 @login_required(login_url='login')
 @user_passes_test(check_role_vendor)
 def edit_food(request, pk=None):
+    # print ("__aa___pk_=_" + str(pk))
     food = get_object_or_404(FoodItem, pk=pk)
+    # print ("__bb___pk_=_" + str(pk))
+    # print(food)
     if request.method == 'POST':
         form = FoodItemForm(request.POST, request.FILES, instance=food)
         if form.is_valid():
+            # print("__a_before_foodtitle")
             foodtitle = form.cleaned_data['food_title']
+            # print("_b_foodtitle_=_"+ str(foodtitle))
             food = form.save(commit=False)
             food.vendor = get_vendor(request)
+            # print("_c_food.vendor_=_" + str(food.vendor))   
             # food.slug = slugify(foodtitle)
             food.slug = slugify(foodtitle)+'-'+str(food.id)
 
             form.save()
             messages.success(request, 'Food Item updated successfully!')
+            # print("__cc_category.id_=_" + str(food.category.id) )
             return redirect('fooditems_by_category', food.category.id)
         else:
             print(form.errors)
