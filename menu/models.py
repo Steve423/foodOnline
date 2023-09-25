@@ -1,6 +1,6 @@
+from tabnanny import verbose
 from django.db import models
 from vendor.models import Vendor
-
 
 
 class Category(models.Model):
@@ -10,7 +10,7 @@ class Category(models.Model):
     description = models.TextField(max_length=250, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    parent_category = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
+    # parent_category = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         verbose_name = 'category'
@@ -18,8 +18,6 @@ class Category(models.Model):
 
     def clean(self):
         self.category_name = self.category_name.capitalize()
-        # self.category_name = self.category_name
-
     
     def __str__(self):
         return self.category_name
@@ -39,6 +37,7 @@ class FoodItem(models.Model):
 
     def __str__(self):
         return self.food_title
+
 
 
 class City_lat_lon(models.Model):

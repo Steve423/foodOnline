@@ -1,13 +1,13 @@
 from django.shortcuts import render
-# from django.http import HttpResponse
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
+# from django.http import HttpResponse, JsonResponse
 
 from vendor.models import Vendor
-from menu.models import  City_lat_lon
+# from menu.models import  City_lat_lon
 from django.contrib.gis.geos import GEOSGeometry
-from django.contrib.gis.measure import D  # ``D`` is a shortcut for ``Distance``
+from django.contrib.gis.measure import D # ``D`` is a shortcut for ``Distance``
 from django.contrib.gis.db.models.functions import Distance
-import winrt.windows.devices.geolocation as wdg, asyncio
+# import winrt.windows.devices.geolocation as wdg, asyncio
 
 def get_or_set_current_location(request):
     if 'lat' in request.session:
@@ -31,7 +31,7 @@ def home(request):
         lng = request.GET.get('lng')
         pnt = GEOSGeometry('POINT(%s %s)' % (get_or_set_current_location(request)))
 
-        vendors = Vendor.objects.filter(user_profile__location__distance_lte=(pnt, D(km=1000))).annotate(distance=Distance("user_profile__location",pnt)).order_by("distance")
+        vendors = Vendor.objects.filter(user_profile__location__distance_lte=(pnt, D(km=1000))).annotate(distance=Distance("user_profile__location", pnt)).order_by("distance")
 
         for v in vendors:
             v.kms = round(v.distance.km, 1)
@@ -41,12 +41,3 @@ def home(request):
         'vendors': vendors,
     }
     return render(request, 'home.html', context)
-
-""" def autocomplete(request):
-    if 'term' in request.GET:
-        qs = City_lat_lon.objects.filter(City__istartwith=request.GET.get('term'))
-        titles = list()
-        for city_lat_lon in qs:
-            titles.append(City_lat_lon.city)
-        return JsonResponse(titles, safe=False)
-    return render(request, 'home.html') """

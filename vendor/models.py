@@ -17,7 +17,7 @@ class Vendor(models.Model):
 
     def __str__(self):
         return self.vendor_name
-    
+
     def is_open(self):
         # Check current day's opening hours.
         today_date = date.today()
@@ -26,6 +26,7 @@ class Vendor(models.Model):
         current_opening_hours = OpeningHour.objects.filter(vendor=self, day=today)
         now = datetime.now()
         current_time = now.strftime("%H:%M:%S")
+
         is_open = None
         for i in current_opening_hours:
             if not i.is_closed:
@@ -39,8 +40,6 @@ class Vendor(models.Model):
                         is_open = False
         return is_open
 
-
-    
     def save(self, *args, **kwargs):
         if self.pk is not None:
             # Update
@@ -60,7 +59,6 @@ class Vendor(models.Model):
                     # Send notification email
                     mail_subject = "We're sorry! You are not eligible for publishing your food menu on our marketplace."
                     send_notification(mail_subject, mail_template, context)
-
         return super(Vendor, self).save(*args, **kwargs)
 
 
@@ -75,7 +73,6 @@ DAYS = [
 ]
 
 HOUR_OF_DAY_24 = [(time(h, m).strftime('%I:%M %p'), time(h, m).strftime('%I:%M %p')) for h in range(0, 24) for m in (0, 30)]
-
 class OpeningHour(models.Model):
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
     day = models.IntegerField(choices=DAYS)

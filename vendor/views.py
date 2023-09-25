@@ -1,8 +1,12 @@
-from django.db import IntegrityError
+from unicodedata import category
+from urllib import response
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import get_object_or_404, redirect, render
+from django.db import IntegrityError
 
 from menu.forms import CategoryForm, FoodItemForm
+from orders.models import Order, OrderedFood
+import vendor
 from .forms import VendorForm, OpeningHourForm
 from accounts.forms import UserProfileForm
 
@@ -17,11 +21,6 @@ from django.template.defaultfilters import slugify
 
 
 def get_vendor(request):
-    # print("__ee_request_user_=_" + str(request.user ))
-    # print("__ff_request_user_id_=_" + str(request.user.id ))
-    print("__ee_before_all_attr_=_")
-    print(dir(request))
-    print("__ff_request.user_=_" + str(request.user))
     vendor = Vendor.objects.get(user=request.user)
     return vendor
 
@@ -43,10 +42,9 @@ def vprofile(request):
         else:
             print(profile_form.errors)
             print(vendor_form.errors)
-
     else:
         profile_form = UserProfileForm(instance = profile)
-        vendor_form = VendorForm(instance = vendor)
+        vendor_form = VendorForm(instance=vendor)
 
     context = {
         'profile_form': profile_form,
@@ -55,6 +53,7 @@ def vprofile(request):
         'vendor': vendor,
     }
     return render(request, 'vendor/vprofile.html', context)
+
 
 @login_required(login_url='login')
 @user_passes_test(check_role_vendor)
@@ -72,13 +71,12 @@ def menu_builder(request):
 def fooditems_by_category(request, pk=None):
     vendor = get_vendor(request)
     category = get_object_or_404(Category, pk=pk)
-    fooditems = FoodItem.objects.filter(vendor=vendor, category=category).order_by('food_title')
+    fooditems = FoodItem.objects.filter(vendor=vendor, category=category)
     context = {
         'fooditems': fooditems,
         'category': category,
     }
     return render(request, 'vendor/fooditems_by_category.html', context)
-
 
 
 @login_required(login_url='login')
@@ -90,15 +88,15 @@ def add_category(request):
             category_name = form.cleaned_data['category_name']
             category = form.save(commit=False)
             category.vendor = get_vendor(request)
-            # category.slug = slugify(category_name)
-
+            
             category.save() # here the category id will be generated
-            category.slug = slugify(category_name)+ '-'+str(category.id)
+            category.slug = slugify(category_name)+'-'+str(category.id) # chicken-15
             category.save()
             messages.success(request, 'Category added successfully!')
             return redirect('menu_builder')
         else:
             print(form.errors)
+
     else:
         form = CategoryForm()
     context = {
@@ -118,19 +116,19 @@ def edit_category(request, pk=None):
             category = form.save(commit=False)
             category.vendor = get_vendor(request)
             category.slug = slugify(category_name)
-
             form.save()
             messages.success(request, 'Category updated successfully!')
             return redirect('menu_builder')
         else:
             print(form.errors)
+
     else:
         form = CategoryForm(instance=category)
     context = {
         'form': form,
         'category': category,
     }
-    return render(request, 'vendor/edit_category.html',context)
+    return render(request, 'vendor/edit_category.html', context)
 
 
 @login_required(login_url='login')
@@ -151,17 +149,15 @@ def add_food(request):
             foodtitle = form.cleaned_data['food_title']
             food = form.save(commit=False)
             food.vendor = get_vendor(request)
-            # food.slug = slugify(foodtitle)
-            food.slug = slugify(foodtitle)+'-'+str(food.id)
-
+            food.slug = slugify(foodtitle)
             form.save()
             messages.success(request, 'Food Item added successfully!')
             return redirect('fooditems_by_category', food.category.id)
         else:
-            print(form.errors) 
-    else:   
+            print(form.errors)
+    else:
         form = FoodItemForm()
-        # modify this form to show ONLY categories for logged in Vendor
+        # modify this form
         form.fields['category'].queryset = Category.objects.filter(vendor=get_vendor(request))
     context = {
         'form': form,
@@ -169,40 +165,32 @@ def add_food(request):
     return render(request, 'vendor/add_food.html', context)
 
 
+
 @login_required(login_url='login')
 @user_passes_test(check_role_vendor)
 def edit_food(request, pk=None):
-    # print ("__aa___pk_=_" + str(pk))
     food = get_object_or_404(FoodItem, pk=pk)
-    # print ("__bb___pk_=_" + str(pk))
-    # print(food)
     if request.method == 'POST':
         form = FoodItemForm(request.POST, request.FILES, instance=food)
         if form.is_valid():
-            # print("__a_before_foodtitle")
             foodtitle = form.cleaned_data['food_title']
-            # print("_b_foodtitle_=_"+ str(foodtitle))
             food = form.save(commit=False)
             food.vendor = get_vendor(request)
-            # print("_c_food.vendor_=_" + str(food.vendor))   
-            # food.slug = slugify(foodtitle)
-            food.slug = slugify(foodtitle)+'-'+str(food.id)
-
+            food.slug = slugify(foodtitle)
             form.save()
             messages.success(request, 'Food Item updated successfully!')
-            # print("__cc_category.id_=_" + str(food.category.id) )
             return redirect('fooditems_by_category', food.category.id)
         else:
             print(form.errors)
+
     else:
         form = FoodItemForm(instance=food)
-        # modify this form to show ONLY categories for logged in Vendor
         form.fields['category'].queryset = Category.objects.filter(vendor=get_vendor(request))
     context = {
         'form': form,
         'food': food,
     }
-    return render(request, 'vendor/edit_food.html',context)
+    return render(request, 'vendor/edit_food.html', context)
 
 
 @login_required(login_url='login')
@@ -213,8 +201,7 @@ def delete_food(request, pk=None):
     messages.success(request, 'Food Item has been deleted successfully!')
     return redirect('fooditems_by_category', food.category.id)
 
-#def opening_hours(request):
-#    return render(request, 'vendor/opening_hours.html')
+
 def opening_hours(request):
     opening_hours = OpeningHour.objects.filter(vendor=get_vendor(request))
     form = OpeningHourForm()
@@ -258,3 +245,28 @@ def remove_opening_hours(request, pk=None):
             return JsonResponse({'status': 'success', 'id': pk})
 
 
+def order_detail(request, order_number):
+    try:
+        order = Order.objects.get(order_number=order_number, is_ordered=True)
+        ordered_food = OrderedFood.objects.filter(order=order, fooditem__vendor=get_vendor(request))
+
+        context = {
+            'order': order,
+            'ordered_food': ordered_food,
+            'subtotal': order.get_total_by_vendor()['subtotal'],
+            'tax_data': order.get_total_by_vendor()['tax_dict'],
+            'grand_total': order.get_total_by_vendor()['grand_total'],
+        }
+    except:
+        return redirect('vendor')
+    return render(request, 'vendor/order_detail.html', context)
+
+
+def my_orders(request):
+    vendor = Vendor.objects.get(user=request.user)
+    orders = Order.objects.filter(vendors__in=[vendor.id], is_ordered=True).order_by('created_at')
+
+    context = {
+        'orders': orders,
+    }
+    return render(request, 'vendor/my_orders.html', context)

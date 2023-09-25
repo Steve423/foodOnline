@@ -1,5 +1,5 @@
-{% load static %} 
-<div class="page-section restaurant-detail-image-section" style=" background: url({% if vendor.user_profile.cover_photo %} {{ vendor.user_profile.cover_photo.url}} {% else %} {% static 'images/default-cover.png' %} {% endif %}) no-repeat scroll 0 0 / cover;">
+{% load static %}
+<div class="page-section restaurant-detail-image-section" style=" background: url({% if vendor.user_profile.cover_photo %} {{ vendor.user_profile.cover_photo.url }} {% else %} {% static 'images/default-cover.png' %}{% endif %}) no-repeat scroll 0 0 / cover;">
 <!--
 style=" background: url({% static 'extra-images/cover-photo01.jpg' %}) no-repeat scroll 0 0 / cover;">
 style=" background: url({% static 'extra-images/cover-photo01.jpg' %}) no-repeat scroll 0 0 / cover;">
@@ -14,11 +14,8 @@ style=" background: url({% static 'extra-images/cover-photo01.jpg' %}) no-repeat
                     <div class="company-info">
                         <div class="img-holder">
                             <figure>
-                                <!--
-                                    <img src="{% static 'extra-images/listing-logo18.png' %}" alt="">
-                                -->
-                                {% if vendor.user_profile.profile_picture  %}
-                                <img src="{{vendor.user_profile.profile_picture.url}}" alt="">
+                                {% if vendor.user_profile.profile_picture %}
+                                <img src="{{ vendor.user_profile.profile_picture.url }}" alt="">
                                 {% else %}
                                 <img src="{% static 'images/default-profile.png' %}" alt="">
                                 {% endif %}

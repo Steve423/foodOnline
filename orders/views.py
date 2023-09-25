@@ -1,4 +1,3 @@
-# from django.shortcuts import render, redirect
 from urllib import response
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
@@ -8,8 +7,7 @@ from menu.models import FoodItem
 from .forms import OrderForm
 from .models import Order, OrderedFood, Payment
 import simplejson as json
-# from .utils import generate_order_number, order_total_by_vendor
-from .utils import generate_order_number
+from .utils import generate_order_number, order_total_by_vendor
 from accounts.utils import send_notification
 from django.contrib.auth.decorators import login_required
 # import razorpay
@@ -18,7 +16,10 @@ from django.contrib.sites.shortcuts import get_current_site
 
 
 
-# Create your views here.
+# client = razorpay.Client(auth=(RZP_KEY_ID, RZP_KEY_SECRET))
+
+
+
 @login_required(login_url='login')
 def place_order(request):
     cart_items = Cart.objects.filter(user=request.user).order_by('created_at')
@@ -26,36 +27,36 @@ def place_order(request):
     if cart_count <= 0:
         return redirect('marketplace')
 
-    # vendors_ids = []
-    # for i in cart_items:
-    #     if i.fooditem.vendor.id not in vendors_ids:
-    #         vendors_ids.append(i.fooditem.vendor.id)
+    vendors_ids = []
+    for i in cart_items:
+        if i.fooditem.vendor.id not in vendors_ids:
+            vendors_ids.append(i.fooditem.vendor.id)
     
-    # # {"vendor_id":{"subtotal":{"tax_type": {"tax_percentage": "tax_amount"}}}}
-    # get_tax = Tax.objects.filter(is_active=True)
-    # subtotal = 0
-    # total_data = {}
-    # k = {}
-    # for i in cart_items:
-    #     fooditem = FoodItem.objects.get(pk=i.fooditem.id, vendor_id__in=vendors_ids)
-    #     v_id = fooditem.vendor.id
-    #     if v_id in k:
-    #         subtotal = k[v_id]
-    #         subtotal += (fooditem.price * i.quantity)
-    #         k[v_id] = subtotal
-    #     else:
-    #         subtotal = (fooditem.price * i.quantity)
-    #         k[v_id] = subtotal
+    # {"vendor_id":{"subtotal":{"tax_type": {"tax_percentage": "tax_amount"}}}}
+    get_tax = Tax.objects.filter(is_active=True)
+    subtotal = 0
+    total_data = {}
+    k = {}
+    for i in cart_items:
+        fooditem = FoodItem.objects.get(pk=i.fooditem.id, vendor_id__in=vendors_ids)
+        v_id = fooditem.vendor.id
+        if v_id in k:
+            subtotal = k[v_id]
+            subtotal += (fooditem.price * i.quantity)
+            k[v_id] = subtotal
+        else:
+            subtotal = (fooditem.price * i.quantity)
+            k[v_id] = subtotal
     
-    #     # Calculate the tax_data
-    #     tax_dict = {}
-    #     for i in get_tax:
-    #         tax_type = i.tax_type
-    #         tax_percentage = i.tax_percentage
-    #         tax_amount = round((tax_percentage * subtotal)/100, 2)
-    #         tax_dict.update({tax_type: {str(tax_percentage) : str(tax_amount)}})
-    #     # Construct total data
-    #     total_data.update({fooditem.vendor.id: {str(subtotal): str(tax_dict)}})
+        # Calculate the tax_data
+        tax_dict = {}
+        for i in get_tax:
+            tax_type = i.tax_type
+            tax_percentage = i.tax_percentage
+            tax_amount = round((tax_percentage * subtotal)/100, 2)
+            tax_dict.update({tax_type: {str(tax_percentage) : str(tax_amount)}})
+        # Construct total data
+        total_data.update({fooditem.vendor.id: {str(subtotal): str(tax_dict)}})
     
 
         
@@ -81,53 +82,40 @@ def place_order(request):
             order.user = request.user
             order.total = grand_total
             order.tax_data = json.dumps(tax_data)
-            # order.total_data = json.dumps(total_data)
-            # order.tax_data = tax_data
-            # order.total_data = total_data
-
+            order.total_data = json.dumps(total_data)
             order.total_tax = total_tax
             order.payment_method = request.POST['payment_method']
             order.save() # order id/ pk is generated
             order.order_number = generate_order_number(order.id)
-            # order.order_number = '1123'
-            # order.vendors.add(*vendors_ids)
+            order.vendors.add(*vendors_ids)
             order.save()
+
+            # # RazorPay Payment
+            # DATA = {
+            #     "amount": float(order.total) * 100,
+            #     "currency": "INR",
+            #     "receipt": "receipt #"+order.order_number,
+            #     "notes": {
+            #         "key1": "value3",
+            #         "key2": "value2"
+            #     }
+            # }
+            # rzp_order = client.order.create(data=DATA)
+            # rzp_order_id = rzp_order['id']
+
             context = {
                 'order': order,
                 'cart_items': cart_items,
+                # 'rzp_order_id': rzp_order_id,
+                # 'RZP_KEY_ID': RZP_KEY_ID,
+                # 'rzp_amount': float(order.total) * 100,
             }
             return render(request, 'orders/place_order.html', context)
-            # return redirect('place_order')
 
         else:
-             print(form.errors)
-
-
-    #         # RazorPay Payment
-    #         DATA = {
-    #             "amount": float(order.total) * 100,
-    #             "currency": "INR",
-    #             "receipt": "receipt #"+order.order_number,
-    #             "notes": {
-    #                 "key1": "value3",
-    #                 "key2": "value2"
-    #             }
-    #         }
-    #         rzp_order = client.order.create(data=DATA)
-    #         rzp_order_id = rzp_order['id']
-
-    #         context = {
-    #             'order': order,
-    #             'cart_items': cart_items,
-    #             'rzp_order_id': rzp_order_id,
-    #             'RZP_KEY_ID': RZP_KEY_ID,
-    #             'rzp_amount': float(order.total) * 100,
-    #         }
-    #         return render(request, 'orders/place_order.html', context)
-
-    #     else:
-    #         print(form.errors)
+            print(form.errors)
     return render(request, 'orders/place_order.html')
+
 
 @login_required(login_url='login')
 def payments(request):
@@ -185,6 +173,11 @@ def payments(request):
             'customer_subtotal': customer_subtotal,
             'tax_data': tax_data,
         }
+        # print("__A_mail_subject_=_" + str(mail_subject))
+        # print("__B_mail_template_=_")
+        # print(str(mail_template))
+        # print("__C_context_=_")
+        # print(str(context))
         send_notification(mail_subject, mail_template, context)
         
 
@@ -193,11 +186,12 @@ def payments(request):
         mail_template = 'orders/new_order_received.html'
         to_emails = []
         for i in cart_items:
+            print("__A_i.fooditem.vendor.user.email_=_" + str(i.fooditem.vendor.user.email))
             if i.fooditem.vendor.user.email not in to_emails:
                 to_emails.append(i.fooditem.vendor.user.email)
 
                 ordered_food_to_vendor = OrderedFood.objects.filter(order=order, fooditem__vendor=i.fooditem.vendor)
-                print(ordered_food_to_vendor)
+                # print(ordered_food_to_vendor)
 
         
                 context = {
@@ -208,6 +202,8 @@ def payments(request):
                     'tax_data': order_total_by_vendor(order, i.fooditem.vendor.id)['tax_dict'],
                     'vendor_grand_total': order_total_by_vendor(order, i.fooditem.vendor.id)['grand_total'],
                 }
+                print("_a_Before_send_notif")
+                print( str(context))
                 send_notification(mail_subject, mail_template, context)
 
         # CLEAR THE CART IF THE PAYMENT IS SUCCESS
