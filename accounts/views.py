@@ -145,17 +145,15 @@ def registerVendor(request):
             # password = password,
             # first_name = first_name,
             # last_name = last_name,
-        mytestPass = "D23jango"
 
-        mydata = {'email':'steve72638@gmail.com',
-                  'first_name':'Ste 72638',
-                  'username': 'steve72638',
-                  'password': mytestPass,
-                  'confirm_password': mytestPass,
-                  'last_name':'Hall'}
-        myvendorr = {'vendor_name': 'Larry Pizza'}
+        mydata = {'email':'bad@gmail.com',
+                  'first_name':'Ste 12345',
+                  'username': 'steve12345',
+                  'last_name':'Htest'}
+        myvendorr = {'vendor_name': 'deftest'}
         form = UserForm(mydata)
         v_form = VendorForm(myvendorr)
+
 
     context = {
         'form': form,
