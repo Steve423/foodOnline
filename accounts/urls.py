@@ -22,4 +22,7 @@ urlpatterns = [
     path('vendor/', include('vendor.urls')),
     path('customer/', include('customers.urls')),
 
+    path('vendor_2activate/<int:pk>/', views.vendor_2activate, name='vendor_2activate'),
+    path('vendor_activate/<uidb64>/<token>/', views.vendor_activate, name='vendor_activate'),
+
 ]

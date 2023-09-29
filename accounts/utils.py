@@ -22,6 +22,10 @@ def detectUser(user):
 def send_verification_email(request, user, mail_subject, email_template):
     from_email = settings.DEFAULT_FROM_EMAIL
     current_site = get_current_site(request)
+    print("_H_send_verification_email_user_pk_=_")
+    print(str(user.pk))
+    print("_H_user_=_")
+    print(user.pk)
     message = render_to_string(email_template, {
         'user': user,
         'domain': current_site,
@@ -32,6 +36,34 @@ def send_verification_email(request, user, mail_subject, email_template):
     mail = EmailMessage(mail_subject, message, from_email, to=[to_email])
     mail.content_subtype = "html"
     mail.send()
+
+def send_vendor_verification_email(request, user, mail_subject, email_template, manager_email, vendor_name,first_name,last_name, vendor_id ):
+    from_email = settings.DEFAULT_FROM_EMAIL
+    current_site = get_current_site(request)
+    print("_F2_send_vendor_verification_email_user_pk_=_")
+    print(str(user.pk))
+    print("_F2_user_=_")
+    print(user.pk)
+    message = render_to_string(email_template, {
+        'user': user,
+        'domain': current_site,
+        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+        'token': default_token_generator.make_token(user),
+        'vendor_name': vendor_name,
+        'first_name': first_name,
+        'last_name': last_name,
+        'vendor_id': vendor_id,
+    })
+    print("__G_send_vendor_verification_email")
+    # print(message)
+    print("__G_manager_email_=_")
+    print(manager_email)
+    # to_email = user.email
+    to_email = manager_email
+    mail = EmailMessage(mail_subject, message, from_email, to=[to_email])
+    mail.content_subtype = "html"
+    mail.send()
+
 
 
 def send_notification(mail_subject, mail_template, context):

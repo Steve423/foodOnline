@@ -186,7 +186,6 @@ def payments(request):
         mail_template = 'orders/new_order_received.html'
         to_emails = []
         for i in cart_items:
-            print("__A_i.fooditem.vendor.user.email_=_" + str(i.fooditem.vendor.user.email))
             if i.fooditem.vendor.user.email not in to_emails:
                 to_emails.append(i.fooditem.vendor.user.email)
 
