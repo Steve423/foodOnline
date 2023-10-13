@@ -56,12 +56,22 @@ table > tbody > tr > td{
     outline: 2px solid #ff0000;
 }
 
+.brdleft{
+    padding-left: 10%;
+}
+.brdright{
+    width:60%;
+}
+
+
 @media only screen and (max-width: 480px) {
+    
     a.get-start-btn{
         display: block;
         margin-top: 15px !important;
         margin-left: 0 !important;
     }
+    
     .main-search-bar{
         padding-top: 100px !important;
         padding-bottom: 50px !important;
@@ -79,6 +89,15 @@ table > tbody > tr > td{
     }
     .table td{
         padding: 0.5rem !important;
+    }
+    .mydirection{
+        flex-direction: row;
+    }
+    .brdleft{
+        padding-left:0;
+    }
+    .brdright{
+        width:60%;
     }
 
 
